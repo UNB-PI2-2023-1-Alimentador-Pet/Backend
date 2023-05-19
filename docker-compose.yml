@@ -1,0 +1,24 @@
+version: '3.6'
+
+services:
+  node-server:
+    build: .
+    container_name: node-server
+    volumes:
+      - .:/app
+    ports:
+      - '3333:3333'
+    depends_on:
+      - database
+
+  database:
+    image: postgres
+    container_name: miaudb
+    ports:
+      - '5432:5432'
+    volumes:
+      - ./miaudata:/var/lib/postgresql
+    environment:
+      - POSTGRES_PASSWORD=miau531
+
+    
