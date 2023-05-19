@@ -1,5 +1,5 @@
 ---
-name: Issue
+name: Feature
 about: Issue
 title: ''
 labels: ''
