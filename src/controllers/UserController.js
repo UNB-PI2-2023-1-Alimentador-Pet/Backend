@@ -20,6 +20,17 @@ class UserController {
             return res.status(500).json({error: error});
         }
     }
+
+    async fetchUsers(req, res) {
+        try {
+            const data = await pool.query("SELECT * FROM USUARIO");
+            console.log(res.rows);
+            return res.status(200).json(data.rows);
+          } catch (error) {
+            console.error(error);
+            return res.status(200).json({error: error});
+          }
+    }
 }
 
 
