@@ -20,5 +20,3 @@ services:
       - ./miaudata:/var/lib/postgresql
     environment:
       - POSTGRES_PASSWORD=miau531
-
-    
