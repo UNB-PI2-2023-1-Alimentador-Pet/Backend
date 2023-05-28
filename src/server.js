@@ -1,7 +1,12 @@
 const app = require("./app.js");
 const { config } = require("dotenv");
+const { db } = require('./db/db.js');
 
 config();
+
+db.sequelize.sync({ force: true }).then(() => {
+  console.log("db has been re sync")
+});
 
 app.listen(process.env.PORT || 3333, () => console.log("Server running"));
 
