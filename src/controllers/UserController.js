@@ -2,64 +2,66 @@ const { pool } = require("../db/db.js");
 
 class UserController {
   async createUser(req, res) {
-    const { nome, email, senha } = req.body;
+    const { nome, email, senha, user_hash } = req.body;
 
     try {
       const data = await pool.query(
-        "INSERT INTO USUARIO (nome, email, senha) VALUES ($1, $2, $3)",
-        [nome, email, senha]
+        "INSERT INTO USUARIO (nome, email, senha, user_hash) VALUES ($1, $2, $3, $4)",
+        [nome, email, senha, user_hash]
       );
-      console.log(`Added data: ${data}`);
+
+      return res.status(200).json({ message: "Data added successfully!" });
     } catch (error) {
-        console.log(error);
-        return res.status(500).json({ error: error });
+      console.log(error);
+      return res.status(500).json({ error: error });
     }
   }
-  
-    async fetchUsers(req, res) {
-        try {
-            const data = await pool.query("SELECT * FROM USUARIO");
-                console.log(res.rows);
-                return res.status(200).json(data.rows);
-        } catch (error) {
-            console.error(error);
-            return res.status(200).json({error: error});
-        }
+
+  async fetchUsers(req, res) {
+    try {
+      const data = await pool.query("SELECT * FROM USUARIO");
+
+      return res.status(200).json(data.rows);
+    } catch (error) {
+      console.error(error);
+      return res.status(200).json({ error: error });
     }
+  }
 
-    async updateUser(req, res) {
-        try {
-            const user_hash = req.params["user_hash"];
-            const new_data = req.body;
+  async updateUser(req, res) {
+    try {
+      const user_hash = req.params.user_hash;
+      const new_data = req.body;
 
-            console.log(user_hash);
+      console.log(user_hash);
 
-            let query = ['UPDATE USUARIO'];
-            let cols = Object.keys(new_data);
+      let query = ["UPDATE USUARIO"];
+      let cols = Object.keys(new_data);
+      console.log(new_data);
 
-            query.push('SET');
+      query.push("SET");
 
-            let set = [];
-            Object.keys(cols).forEach(function (key, i) {
-                set.push(key + ' = ($' + (i + 1) + ')'); 
-            });
+      let set = [];
+      cols.forEach(function (key, i) {
+        set.push(key + " = ($" + (i + 1) + ")");
+      });
 
-            query.push(set.join(', '));
+      query.push(set.join(", "));
 
-            query.push('WHERE user_hash = ' + user_hash );
+      query.push("WHERE user_hash = '" + user_hash + "'");
 
-            query = query.join(' ');
+      query = query.join(" ");
 
-            console.log(query);
+      console.log(query);
 
-            const data = await pool.query(query, new_data)
+      const data = await pool.query(query, Object.values(new_data));
 
-            return res.status(200).json({user: data["rows"][0]});
-        } catch (error) {
-            console.log(error);
-            return res.status(400).json({error: error});
-        }
+      return res.status(200).json({ user: data });
+    } catch (error) {
+      console.log(error);
+      return res.status(400).json({ error: error });
     }
+  }
 }
 
 module.exports = new UserController();
