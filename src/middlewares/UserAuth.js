@@ -1,4 +1,5 @@
 const { db } = require("../db/db");
+const jwt = require('jsonwebtoken');
 //Assigning db.users to User variable
 const User = db.users;
 
@@ -35,7 +36,43 @@ const saveUser = async (req, res, next) => {
   }
 };
 
+const protect = async (req, res, next) => {
+  let token;
+
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    try {
+      // Get token from header
+      token = req.headers.authorization.split(" ")[1];
+
+      // Verify token
+      const decoded = jwt.verify(token, process.env.secretKey);
+
+      // Get user from the token
+      req.user = await User.findOne({
+        where: { id: decoded.id }
+      });
+
+      if (req.user.accepted === false) {
+        throw new Error();
+      }
+
+      next();
+    } catch (error) {
+
+      return res.status(401).json(error);
+    }
+  }
+
+  if (!token) {
+    return res.status(401).json({error: 'Invalid token!'});
+  }
+}
+
 //exporting module
 module.exports = {
   saveUser,
+  protect
 };
