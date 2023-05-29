@@ -8,11 +8,12 @@ const User = db.users;
 //hashing users password before its saved to the database with bcrypt
 const signup = async (req, res) => {
   try {
-    const { nome, email, senha } = req.body;
+    const { nome, email, senha, userHash } = req.body;
     const data = {
       nome,
       email,
       senha: await bcrypt.hash(senha, 10),
+      userHash
     };
     //saving the user
     const user = await User.create(data);
@@ -81,9 +82,24 @@ const login = async (req, res) => {
   }
 };
 
+const updateUser = async (req, res) => {
+  try {
+    const data = await User.update(req.body, {
+      where: { userHash: req.params.userHash }
+    });
+
+    return res.status(200).json(`${data} user(s) successfully updated!`);
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json(error);
+  }
+}
+
 module.exports = {
   signup,
   login,
+  updateUser
 };
 
 // module.exports = new UserController();
