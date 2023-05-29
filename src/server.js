@@ -4,7 +4,7 @@ const { db } = require('./db/db.js');
 
 config();
 
-db.sequelize.sync({ force: true }).then(() => {
+db.sequelize.sync().then(() => {
   console.log("db has been re sync")
 });
 
