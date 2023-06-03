@@ -1,6 +1,17 @@
+require("dotenv").config();
 const {Sequelize, DataTypes} = require('sequelize');
 
-const sequelize = new Sequelize(`postgres://miauadmin:531miau@miaudb:5432/miaudb`, {dialect: "postgres"})
+
+const dbName = process.env.DB_NAME;
+const dbHost = process.env.DB_HOST;
+const dbPort = process.env.DB_PORT;
+const dbUser = process.env.DB_USER;
+const dbPassword = process.env.DB_PASSWORD;
+
+const databaseUrl = `postgres://${dbUser}:${dbPassword}@${dbHost}:${dbPort}/${dbName}`;
+console.log(databaseUrl)
+
+const sequelize = new Sequelize(databaseUrl, {dialect: "postgres"})
 const db = {}
 
 sequelize.authenticate().then(() => {
