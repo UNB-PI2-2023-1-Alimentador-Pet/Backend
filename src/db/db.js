@@ -11,7 +11,13 @@ const dbPassword = process.env.DB_PASSWORD;
 const databaseUrl = `postgres://${dbUser}:${dbPassword}@${dbHost}:${dbPort}/${dbName}`;
 console.log(databaseUrl)
 
-const sequelize = new Sequelize(databaseUrl, {dialect: "postgres"})
+const sequelize = new Sequelize(databaseUrl, {dialect: "postgres", dialectOptions: {
+  ssl: {
+    require: true,
+    rejectUnauthorized: false
+  }
+}})
+
 const db = {}
 
 sequelize.authenticate().then(() => {
