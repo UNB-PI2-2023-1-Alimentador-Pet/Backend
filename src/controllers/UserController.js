@@ -1,6 +1,7 @@
 const bcrypt = require("bcrypt");
 const { db } = require("../db/db.js");
 const jwt = require("jsonwebtoken");
+const uuidv4 = require("uuid").v4
 
 const User = db.users;
 
@@ -8,12 +9,12 @@ const User = db.users;
 //hashing users password before its saved to the database with bcrypt
 const signup = async (req, res) => {
   try {
-    const { nome, email, senha, userHash } = req.body;
+    const { nome, email, senha } = req.body;
     const data = {
       nome,
       email,
       senha: await bcrypt.hash(senha, 10),
-      userHash
+      userHash: uuidv4() 
     };
     //saving the user
     const user = await User.create(data);
@@ -36,6 +37,7 @@ const signup = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
+    return res.status(500).json(error)
   }
 };
 
