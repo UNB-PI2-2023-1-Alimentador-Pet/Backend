@@ -1,7 +1,7 @@
 const bcrypt = require("bcrypt");
 const { db } = require("../db/db.js");
 const jwt = require("jsonwebtoken");
-const uuidv4 = require("uuid").v4
+const uuidv4 = require("uuid").v4;
 
 const User = db.users;
 
@@ -14,7 +14,7 @@ const signup = async (req, res) => {
       nome,
       email,
       senha: await bcrypt.hash(senha, 10),
-      userHash: uuidv4() 
+      userHash: uuidv4(),
     };
     //saving the user
     const user = await User.create(data);
@@ -37,7 +37,7 @@ const signup = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    return res.status(500).json(error)
+    return res.status(500).json(error);
   }
 };
 
@@ -81,28 +81,34 @@ const login = async (req, res) => {
     }
   } catch (error) {
     console.log(error);
-    return res.status(500).send({error: error})
+    return res.status(500).send({ error: error });
   }
 };
 
 const updateUser = async (req, res) => {
-  try {
-    const data = await User.update(req.body, {
-      where: { userHash: req.params.userHash }
-    });
+  let user = {};
 
-    return res.status(200).json(`${data} user(s) successfully updated!`);
+  try {
+    await User.update(req.body, {
+      where: { userHash: req.params.userHash },
+    }).then(async () => {
+      user = await User.findOne({
+        where: { userHash: req.params.userHash },
+      });
+    });
+    
+    return res.status(200).json(user);
   } catch (error) {
     console.log(error);
 
     return res.status(500).json(error);
   }
-}
+};
 
 module.exports = {
   signup,
   login,
-  updateUser
+  updateUser,
 };
 
 // module.exports = new UserController();
