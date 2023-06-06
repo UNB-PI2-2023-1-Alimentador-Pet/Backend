@@ -18,6 +18,14 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         unique: true,
         allowNull: false
+      },
+      passwordResetToken: {
+        type: String,
+        select: false,
+      },
+      passwordResetExpires: {
+        type: Date,
+        select: false,
       }
   }, {timestamps: true})
 
