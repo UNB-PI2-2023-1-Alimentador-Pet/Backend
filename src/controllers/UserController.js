@@ -3,6 +3,7 @@ const { db } = require("../db/db.js");
 const jwt = require("jsonwebtoken");
 const crypto = require('crypto');
 const mailer = require('../models/mailer.js');
+const uuidv4 = require("uuid").v4;
 
 const User = db.users;
 
@@ -105,12 +106,11 @@ const updateUser = async (req, res) => {
     return res.status(500).json(error);
   }
 };
-
-const resetPassword = async (req, res) => {
+const forgotPassword = async (req, res) => {
   const { email } = req.body;
 
   try {
-    const user = await User.findOne({ email });
+    const user = await User.findOne(( { where: { email: email} } ));
 
     if(!user){
       return res.status(400).send({ error: 'User not found' });
@@ -144,6 +144,36 @@ const resetPassword = async (req, res) => {
     
   } catch (err) {
     res.status(400).send({ error: 'Error on forgot password, try again' });
+    console.log(err)
+  }
+}
+
+const resetPassword = async (req,res) => {
+  const { email, token, password } = req.body;
+
+  try {
+    const user = await User.findOne( { where: { email: email} } )
+      // .select('+passwordResetToken passwordResetExpires');
+
+    if(!user){
+      return res.status(400).send({ error: 'User not found' });
+    }
+
+    if(token !== user.passwordResetToken)
+      return res.status(400).send({ error: 'Token Invalid'});
+
+    const now = new Date();
+
+    if(now > user.passwordResetExpires)
+      return res.status(400).send({ error: 'Token expired, generate a new one' });
+
+    user.password = await bcrypt.hash(password, 10);
+    await user.save();
+
+    res.send();
+
+  } catch (err) {
+    res.status(400).send({ error: 'Cannot reset password, try again' });
   }
 }
 
@@ -151,6 +181,7 @@ module.exports = {
   signup,
   login,
   updateUser,
+  forgotPassword,
   resetPassword
 };
 

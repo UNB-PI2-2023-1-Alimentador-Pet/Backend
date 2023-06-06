@@ -19,11 +19,11 @@ module.exports = (sequelize, DataTypes) => {
         unique: true,
         allowNull: false
       },
-      passwordResetToken: {
+      passwordresettoken: {
         type: String,
         select: false,
       },
-      passwordResetExpires: {
+      passwordresetexpires: {
         type: Date,
         select: false,
       }
