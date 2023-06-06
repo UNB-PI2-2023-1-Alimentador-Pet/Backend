@@ -2,6 +2,7 @@ const bcrypt = require("bcrypt");
 const { db } = require("../db/db.js");
 const jwt = require("jsonwebtoken");
 const crypto = require('crypto');
+const mailer = require('../models/mailer.js');
 
 const User = db.users;
 
@@ -126,6 +127,18 @@ const resetPassword = async (req, res) => {
         passwordResetExpires: now,
       }
     });
+
+    mailer.sendMail({
+      to: email,
+      from: 'hugoaraliveira@gmail.com',
+      template: 'src/resources/mail',
+      context: { token }
+    }), (err) => {
+      if (err)
+        return res.status(400).send({ error: 'Cannot send forgot password email'});
+
+      return res.send();
+    }
 
     console.log(token, now);
     
