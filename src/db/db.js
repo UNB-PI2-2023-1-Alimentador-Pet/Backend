@@ -11,12 +11,16 @@ const dbPassword = process.env.DB_PASSWORD;
 const databaseUrl = `postgres://${dbUser}:${dbPassword}@${dbHost}:${dbPort}/${dbName}`;
 console.log(databaseUrl)
 
-const sequelize = new Sequelize(databaseUrl, {dialect: "postgres", dialectOptions: {
+const PRODUCTION_DB_OPTIONS = {dialect: "postgres", dialectOptions: {
   ssl: {
     require: true,
     rejectUnauthorized: false
   }
-}})
+}};
+
+const DEVELOPMENT_DB_OPTIONS = {dialect: "postgres"};
+
+const sequelize = new Sequelize(databaseUrl, PRODUCTION_DB_OPTIONS);
 
 const db = {}
 
@@ -31,5 +35,6 @@ db.sequelize = sequelize
 
 //connecting to model
 db.users = require('../models/UserModel') (sequelize, DataTypes)
+db.schedules = require('../models/ScheduleModel') (sequelize, DataTypes)
 
 module.exports = { db };
