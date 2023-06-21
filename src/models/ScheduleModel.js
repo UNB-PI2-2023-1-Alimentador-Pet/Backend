@@ -10,11 +10,11 @@ module.exports = (sequelize, DataTypes) => {
       allowNull: false
     },
     recorrencia: {
-      type: DataTypes.ARRAY(DataTypes.STRING),
+      type: DataTypes.ARRAY(DataTypes.INTEGER),
       allowNull: false
     },
     horario: {
-      type: DataTypes.DATE,
+      type: DataTypes.TIME,
       allowNull: false
     },
     tempoBandeja: {

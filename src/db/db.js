@@ -20,7 +20,7 @@ const PRODUCTION_DB_OPTIONS = {dialect: "postgres", dialectOptions: {
 
 const DEVELOPMENT_DB_OPTIONS = {dialect: "postgres"};
 
-const sequelize = new Sequelize(databaseUrl, PRODUCTION_DB_OPTIONS);
+const sequelize = new Sequelize(databaseUrl, DEVELOPMENT_DB_OPTIONS);
 
 const db = {}
 
@@ -34,7 +34,8 @@ db.Sequelize = Sequelize
 db.sequelize = sequelize
 
 //connecting to model
-db.users = require('../models/UserModel') (sequelize, DataTypes)
-db.schedules = require('../models/ScheduleModel') (sequelize, DataTypes)
+db.users = require('../models/UserModel') (sequelize, DataTypes);
+db.schedules = require('../models/ScheduleModel') (sequelize, DataTypes);
+db.histories = require('../models/HistoryModel') (sequelize, DataTypes);
 
 module.exports = { db };
