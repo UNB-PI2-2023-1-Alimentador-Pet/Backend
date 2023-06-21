@@ -1,3 +1,5 @@
+// const DataTypes = require('sequelize').DataTypes
+
 module.exports = (sequelize, DataTypes) => {
   const User = sequelize.define( "USUARIO", {
       nome: {
@@ -20,11 +22,11 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false
       },
       passwordresettoken: {
-        type: String,
+        type: DataTypes.STRING,
         select: false,
       },
       passwordresetexpires: {
-        type: Date,
+        type: DataTypes.DATE,
         select: false,
       }
   }, {timestamps: true})

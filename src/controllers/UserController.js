@@ -111,6 +111,7 @@ const forgotPassword = async (req, res) => {
 
   try {
     const user = await User.findOne(( { where: { email: email} } ));
+    console.log(user)
 
     if(!user){
       return res.status(400).send({ error: 'User not found' });
@@ -121,26 +122,66 @@ const forgotPassword = async (req, res) => {
     const now = new Date();
     now.setHours(now.getHours() + 1);
 
-    await User.findByIdAndUpdate(user.id, {
-      '$set': {
-        passwordResetToken: token,
-        passwordResetExpires: now,
-      }
-    });
+    //Buscar pelo userID, salvar o token e setar o expires pro tempo
+    //atual
+
+    // await User.findByIdAndUpdate(user.id, {
+    //   '$set': {
+    //     passwordResetToken: token,
+    //     passwordResetExpires: now,
+    //   }
+    // });
+
+    const v8 = require('v8');
+
+    // Obtém as estatísticas da heap
+    const heapStatistics = v8.getHeapStatistics();
+
+    // Obtém o tamanho atual da heap em bytes
+    const heapSize = heapStatistics.used_heap_size;
+
+    // Converte o tamanho da heap para megabytes
+    const heapSizeInMB = heapSize / (1024 * 1024);
+
+    // Imprime o tamanho da heap em megabytes
+    console.log(`Tamanho da Heap: ${heapSizeInMB} MB`);
+
+    user.passwordResetToken = token;
+    user.passwordResetExpires = now;
+    await user.save();
+
+    // try {
+    //   if (user) {
+    //     user.passwordResetToken = token;
+    //     user.passwordResetExpires = now;
+    //     await user.save();
+    //     console.log('Informações do usuário atualizadas com sucesso.');
+    //   } else {
+    //     console.log('Usuário não encontrado.');
+    //   }
+    // } catch (error) {
+    //   console.error('Erro ao atualizar as informações do usuário:', error);
+    // }
+
+    let mailError;
 
     mailer.sendMail({
       to: email,
       from: 'hugoaraliveira@gmail.com',
-      template: 'src/resources/mail',
+      // template: 'auth/forgot_password',
+      text: 'testing',
       context: { token }
-    }), (err) => {
+    }, (err) => {
       if (err)
-        return res.status(400).send({ error: 'Cannot send forgot password email'});
-
-      return res.send();
-    }
+        MailError = err
+    })
 
     console.log(token, now);
+
+    if (mailError)
+      return res.status(500).send({ error: mailError});
+    
+    return res.status(200).send();
     
   } catch (err) {
     res.status(400).send({ error: 'Error on forgot password, try again' });
