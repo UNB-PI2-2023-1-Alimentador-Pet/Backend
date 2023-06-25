@@ -1,9 +1,33 @@
 const { db } = require("../db/db.js");
 
 const Schedule = db.schedules;
+const User = db.users;
 
 const createSchedule = async (req, res) => {
+  let schedule;
 
+  try {
+    const user = await User.findOne({
+      where: { userHash: req.body.userHash }
+    });
+
+    const schedule = await Schedule.findOne({
+      where: { horario: req.body.horario }
+    });
+
+    if (user && !schedule) {
+      await Schedule.create(req.body)
+      .then((createdSchedule) => {
+        return res.status(200).json(createdSchedule);
+      });
+    } else if (schedule) {
+      return res.status(500).json({error: 'There\'s a schedule registered for the same time!'});
+    } else {
+      return res.status(404).json({error: 'Invalid user hash!'});
+    }
+  } catch (error) {
+    return res.status(500).json(error);
+  }
 }
 
 const updateSchedule = async (req, res) => {
