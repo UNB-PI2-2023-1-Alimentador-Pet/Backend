@@ -39,11 +39,21 @@ const deleteSchedule = async (req, res) => {
 }
 
 const getSchedules = async (req, res) => {
+  try {
+    const schedules = await Schedule.findAll({ where: { userHash: req.params.userHash }});
 
+    if (schedules.length) {
+      return res.status(200).json(schedules);
+    }
+
+    return res.status(200).json({message: 'No schedules found for this user!'});
+  } catch (error) {
+    return res.status(500).json({error: error});
+  }
 }
 
 const sendSchedulesMQTT = async () => {
-
+  
 }
 
 module.exports = {
