@@ -14,7 +14,7 @@ routes.post('/users/login', login);
 routes.put('/users/edit/:userHash', userAuth.protect, updateUser);
 routes.get('/schedules/:userHash', userAuth.protect, getSchedules);
 routes.post('/schedules/new', userAuth.protect, createSchedule);
-routes.put('/schedules/edit/:userHash', userAuth.protect, updateSchedule);
-routes.delete('/schedules/delete/:userHash', userAuth.protect, deleteSchedule);
+routes.put('/schedules/edit/:scheduleId', userAuth.protect, updateSchedule);
+routes.delete('/schedules/delete/:scheduleId', userAuth.protect, deleteSchedule);
 
 module.exports = routes;

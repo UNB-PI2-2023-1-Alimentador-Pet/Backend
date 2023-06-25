@@ -12,7 +12,11 @@ const createSchedule = async (req, res) => {
     });
 
     const schedule = await Schedule.findOne({
-      where: { horario: req.body.horario }
+      where: {
+        horario: req.body.horario,
+        quantidade: req.body.quantidade,
+        userHash: req.body.userHash
+      }
     });
 
     if (user && !schedule) {
@@ -25,7 +29,7 @@ const createSchedule = async (req, res) => {
         });
       });
     } else if (schedule) {
-      return res.status(500).json({error: 'There\'s a schedule registered for the same time!'});
+      return res.status(500).json({error: 'There\'s a schedule registered for with same horario and quantidade!'});
     } else {
       return res.status(404).json({error: 'Invalid user hash!'});
     }
@@ -35,11 +39,59 @@ const createSchedule = async (req, res) => {
 }
 
 const updateSchedule = async (req, res) => {
+  let schedule = {};
+  let scheduleId = req.params.scheduleId;
 
+  const horario = scheduleId.split("_")[0];
+  const quantidade = scheduleId.split("_")[1];
+  const userHash = scheduleId.split("_")[2];
+
+
+  try {
+    await Schedule.update(req.body, {
+      where: {
+        userHash: userHash,
+        horario: horario,
+        quantidade: quantidade
+      },
+    }).then(async () => {
+      schedule = await Schedule.findOne({
+        where: {
+          userHash:  userHash,
+          horario: horario,
+          quantidade: quantidade
+        }
+      });
+    });
+
+    return res.status(200).json(schedule);
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json(error);
+  }
 }
 
 const deleteSchedule = async (req, res) => {
+  let scheduleId = req.params.scheduleId;
 
+  const horario = scheduleId.split("_")[0];
+  const quantidade = scheduleId.split("_")[1];
+  const userHash = scheduleId.split("_")[2];
+
+  try {
+    await Schedule.destroy({
+      where: {
+        userHash:  userHash,
+        horario: horario,
+        quantidade: quantidade
+      }
+    });
+
+    return res.status(200).json({message: 'Schedule deleted!'});
+  } catch (error) {
+    return res.status(500).json(error);
+  }
 }
 
 const getSchedules = async (req, res) => {

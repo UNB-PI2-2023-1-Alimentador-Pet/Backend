@@ -7,7 +7,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     quantidade: {
       type: DataTypes.FLOAT,
-      allowNull: false
+      allowNull: false,
+      primaryKey: true
     },
     recorrencia: {
       type: DataTypes.ARRAY(DataTypes.INTEGER),
@@ -15,7 +16,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     horario: {
       type: DataTypes.TIME,
-      allowNull: false
+      allowNull: false,
+      primaryKey: true
     },
     tempoBandeja: {
       type: DataTypes.INTEGER,
@@ -23,7 +25,8 @@ module.exports = (sequelize, DataTypes) => {
     },
     userHash: {
       type: DataTypes.STRING,
-      allowNull: false
+      allowNull: false,
+      primaryKey: true
     }
   }, {timestamps: true});
 
