@@ -55,16 +55,19 @@ const updateSchedule = async (req, res) => {
         quantidade: quantidade
       },
     }).then(async () => {
-      schedule = await Schedule.findOne({
-        where: {
-          userHash:  userHash,
-          horario: horario,
-          quantidade: quantidade
-        }
-      });
+        await sendSchedulesMQTT(userHash).then(async (resolve) => {
+          schedule = await Schedule.findOne({
+            where: {
+              userHash:  userHash,
+              horario: horario,
+              quantidade: quantidade
+            }
+          });
+
+          return res.status(200).json(schedule);
+        });
     });
 
-    return res.status(200).json(schedule);
   } catch (error) {
     console.log(error);
 
@@ -73,6 +76,7 @@ const updateSchedule = async (req, res) => {
 }
 
 const deleteSchedule = async (req, res) => {
+  let schedule;
   let scheduleId = req.params.scheduleId;
 
   const horario = scheduleId.split("_")[0];
@@ -86,7 +90,19 @@ const deleteSchedule = async (req, res) => {
         horario: horario,
         quantidade: quantidade
       }
-    });
+    }).then(async (resolve) => {
+      await sendSchedulesMQTT(userHash).then(async (resolve) => {
+        schedule = await Schedule.findOne({
+          where: {
+            userHash:  userHash,
+            horario: horario,
+            quantidade: quantidade
+          }
+        });
+
+        return res.status(200).json(schedule);
+      });
+    })
 
     return res.status(200).json({message: 'Schedule deleted!'});
   } catch (error) {
