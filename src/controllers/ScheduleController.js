@@ -1,10 +1,10 @@
 const { db } = require("../db/db.js");
-
+const { publishMessage } = require('../utils/mqtt.js');
 const Schedule = db.schedules;
 const User = db.users;
 
 const createSchedule = async (req, res) => {
-  let schedule;
+  const topic = `schedules/${req.body.userHash}`;
 
   try {
     const user = await User.findOne({
@@ -17,8 +17,12 @@ const createSchedule = async (req, res) => {
 
     if (user && !schedule) {
       await Schedule.create(req.body)
-      .then((createdSchedule) => {
-        return res.status(200).json(createdSchedule);
+      .then(async (createdSchedule) => {
+        const schedules = await Schedule.findAll({ where: { userHash: req.body.userHash }});
+
+        await sendSchedulesMQTT(req.body.userHash).then((resolve) => {
+          return res.status(200).json(createdSchedule);
+        });
       });
     } else if (schedule) {
       return res.status(500).json({error: 'There\'s a schedule registered for the same time!'});
@@ -52,8 +56,17 @@ const getSchedules = async (req, res) => {
   }
 }
 
-const sendSchedulesMQTT = async () => {
-  
+const sendSchedulesMQTT = async (userHash) => {
+  try {
+    const schedules = await Schedule.findAll({ where: { userHash: userHash }});
+    const topic = `schedules/${userHash}`;
+
+    await publishMessage(topic, schedules);
+  } catch (error) {
+    console.log(error);
+
+    throw(error);
+  }
 }
 
 module.exports = {

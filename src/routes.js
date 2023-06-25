@@ -2,7 +2,7 @@ const { Router } = require("express");
 const UserController = require("./controllers/UserController");
 const {
   createSchedule, updateSchedule,
-  deleteSchedule, getSchedules
+  deleteSchedule, getSchedules, sendSchedulesMQTT
 } = require("./controllers/ScheduleController");
 const { signup, login, updateUser } = UserController;
 const userAuth = require('./middlewares/UserAuth');
