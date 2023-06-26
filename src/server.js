@@ -1,19 +1,22 @@
-const app = require("./app.js");
-const { config } = require("dotenv");
-const { db } = require('./db/db.js');
+const express = require("express");
+const swaggerJsdoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
+const routes = require("./routes");
 
-config();
+const app = express();
 
-db.sequelize.sync().then(() => {
-  console.log("db has been re sync")
-});
+// Configuração do Swagger
+const swaggerOptions = {
+  swaggerDefinition: require("../swagger.json"),
+  apis: ["./routes.js"],
+};
 
-app.listen(process.env.PORT || 3333, () => console.log("Server running"));
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-async function failGracefully() {
-  console.log("Something is gonna blow up.");
-  process.exit(0);
-}
+app.use(express.json());
+app.use(routes);
 
-process.on("SIGTERM", failGracefully);
-process.on("SIGINT", failGracefully);
+app.listen(process.env.PORT || 3333, () =>
+  console.log("Server running")
+);
