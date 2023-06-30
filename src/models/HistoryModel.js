@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         },
         data: {
-            type: DataTypes.DATE,
+            type: DataTypes.DATEONLY,
             allowNull: false,
         },
         horario: {
@@ -19,6 +19,10 @@ module.exports = (sequelize, DataTypes) => {
         foto: {
             type: DataTypes.BLOB('long'),
             allowNull: true
+        },
+        userHash: {
+            type: DataTypes.STRING,
+            allowNull: false
         }
     }, {timestamps: true});
 
