@@ -15,7 +15,17 @@ const createHistory = async (req, res) => {
 }
 
 const getHistories = async (req, res) => {
+    try {
+        const history = await History.findAll({ where: { userHash: req.params.userHash }});
     
+        if (history.length) {
+          return res.status(200).json(history);
+        }
+    
+        return res.status(200).json({message: 'No histories found for this user!'});
+      } catch (error) {
+        return res.status(500).json({error: error});
+      }
 }
 
 const bindImage = async (req, res) => {
