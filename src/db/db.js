@@ -37,5 +37,6 @@ db.sequelize = sequelize
 db.users = require('../models/UserModel') (sequelize, DataTypes);
 db.schedules = require('../models/ScheduleModel') (sequelize, DataTypes);
 db.histories = require('../models/HistoryModel') (sequelize, DataTypes);
+db.petfeeders = require('../models/PetFeederModel') (sequelize, DataTypes);
 
 module.exports = { db };

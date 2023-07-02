@@ -46,7 +46,7 @@ const bindImageToHistory = async (req, res) => {
 
     History.update({
       foto: fs.readFileSync(
-        "./public/upload/pets/" + req.file.filename
+        "./public/upload/histories/" + req.file.filename
       ),
     }, {
         where: {
