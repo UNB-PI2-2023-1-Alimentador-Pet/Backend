@@ -4,9 +4,10 @@ const {
   createSchedule, updateSchedule,
   deleteSchedule, getSchedules, sendSchedulesMQTT
 } = require("./controllers/ScheduleController");
-const { bindImage, createHistory, getHistories } = require("./controllers/HistoryController");
+const { bindImageToHistory, createHistory, getHistories } = require("./controllers/HistoryController");
 const { signup, login, updateUser } = UserController;
 const userAuth = require('./middlewares/UserAuth');
+const uploadImage = require('./middlewares/Upload');
 
 const routes = Router();
 
@@ -19,6 +20,6 @@ routes.put('/schedules/edit/:scheduleId', userAuth.protect, updateSchedule);
 routes.delete('/schedules/delete/:scheduleId', userAuth.protect, deleteSchedule);
 routes.post('/histories/new', userAuth.protect, createHistory);
 routes.get('/histories/:userHash', userAuth.protect, getHistories);
-routes.put('/histories/bind_image/:id', userAuth.protect, bindImage);
+routes.put('/histories/bind_image/:id', userAuth.protect, uploadImage.single('file'), bindImageToHistory);
 
 module.exports = routes;
