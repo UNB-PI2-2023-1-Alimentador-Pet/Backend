@@ -2,6 +2,8 @@ const bcrypt = require("bcrypt");
 const { db } = require("../db/db.js");
 const jwt = require("jsonwebtoken");
 const uuidv4 = require("uuid").v4;
+const nodemailer = require("nodemailer");
+const crypto = require("crypto");
 
 const User = db.users;
 
@@ -105,10 +107,56 @@ const updateUser = async (req, res) => {
   }
 };
 
+var transport = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "email",
+    pass: "senha",
+  },
+});
+
+
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      return res.status(404).send("Usuário não encontrado");
+    }
+
+    const token = crypto.randomBytes(20).toString("hex");
+
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hora
+    await user.save();
+
+    const mailOptions = {
+      from: "miaufeeder@gmail.com", 
+      to: user.email,
+      subject: "Redefinir senha",
+      text: `Você está recebendo este email porque solicitou a redefinição de senha.\n\n` +
+        `Clique no link para criar uma nova senha:\n\n` +
+        `http://${req.headers.host}/users/reset-password/${token}\n\n` +
+        `Se você não solicitou uma mudança de senha, entre em contato com miaufeeder@gmail.com.\n`,
+    };
+
+    await transport.sendMail(mailOptions);
+
+    return res.status(200).send("Email de redefinição de senha enviado");
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send("Ocorreu um erro ao enviar o email.");
+  }
+};
+
+
 module.exports = {
   signup,
   login,
   updateUser,
+  forgotPassword,
 };
 
 // module.exports = new UserController();
