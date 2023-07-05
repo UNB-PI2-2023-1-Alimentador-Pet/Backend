@@ -141,8 +141,8 @@ const forgotPassword = async (req, res) => {
       to: user.email,
       subject: "Redefinir senha",
       text: `Você está recebendo este email porque solicitou a redefinição de senha.\n\n` +
-        `Clique no link para criar uma nova senha:\n\n` +
-        `http://${req.headers.host}/users/reset-password/${token}\n\n` +
+        `Digite o token no app para criar uma nova senha:\n\n` +
+        `Token: ${token}\n` +
         `Se você não solicitou uma mudança de senha, entre em contato com miaufeeder@gmail.com.\n`,
     };
 
