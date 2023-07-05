@@ -6,6 +6,7 @@ const {
 } = require("./controllers/ScheduleController");
 const { bindImageToHistory, createHistory, getHistories } = require("./controllers/HistoryController");
 const { signup, login, updateUser } = UserController;
+const { signup, login, updateUser, forgotPassword, resetPassword } = UserController;
 const userAuth = require('./middlewares/UserAuth');
 const uploadHistoryImage = require('./middlewares/UploadHistoryImage');
 const uploadFeederImage = require('./middlewares/UploadFeederImage');
@@ -29,5 +30,7 @@ routes.get('/feeders/:userHash', userAuth.protect, getPetFeeders);
 routes.put('/feeders/bind_image/:token', userAuth.protect, uploadFeederImage.single('file'), bindImageToFeeder);
 routes.put('/feeders/bind_audio/:token', userAuth.protect, uploadFeederAudio.single('file'), bindAudioToFeeder);
 routes.put('/feeders/:token', userAuth.protect, updatePetFeeder);
+routes.post("/users/forgot-password", forgotPassword);
+routes.post("/users/reset-password", resetPassword);
 
 module.exports = routes;

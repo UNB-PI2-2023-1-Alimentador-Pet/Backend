@@ -2,6 +2,9 @@ const bcrypt = require("bcrypt");
 const { db } = require("../db/db.js");
 const jwt = require("jsonwebtoken");
 const uuidv4 = require("uuid").v4;
+const nodemailer = require("nodemailer");
+const crypto = require("crypto");
+const { Op } = require("sequelize");
 
 const User = db.users;
 
@@ -16,6 +19,7 @@ const signup = async (req, res) => {
       senha: await bcrypt.hash(senha, 10),
       userHash: uuidv4(),
     };
+    
     //saving the user
     const user = await User.create(data);
 
@@ -105,10 +109,86 @@ const updateUser = async (req, res) => {
   }
 };
 
+var transport = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: "miaufeeder@gmail.com",
+    pass: "prtqpwagcpgnzwgz",
+  },
+});
+
+
+const forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      return res.status(404).send("Usuário não encontrado");
+    }
+
+    const token = crypto.randomBytes(5).toString("hex");
+
+    // const user = await User.create(data);
+
+    user.resetpToken = token;
+    user.resetpExpires = Date.now() + 3600000; // 1 hora
+    await user.save();
+
+    const mailOptions = {
+      from: "miaufeeder@gmail.com", 
+      to: user.email,
+      subject: "Redefinir senha",
+      text: `Você está recebendo este email porque solicitou a redefinição de senha.\n\n` +
+        `Digite o token no app para criar uma nova senha:\n\n` +
+        `Token: ${token}\n` +
+        `Se você não solicitou uma mudança de senha, entre em contato com miaufeeder@gmail.com.\n`,
+    };
+
+    await transport.sendMail(mailOptions);
+
+    return res.status(200).send("Email de redefinição de senha enviado");
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send("Ocorreu um erro ao enviar o email.");
+  }
+};
+
+const resetPassword = async (req, res) => {
+  const { token, senha } = req.body;
+
+  try {
+    const user = await User.findOne({
+      where: {
+        resetpToken: token,
+        resetpExpires: { [Op.gt]: Date.now() }, // Verifica se o token ainda é válido
+      },
+    });
+
+    if (!user) {
+      return res.status(400).send("Token inválido ou expirado");
+    }
+
+    // Define a nova senha e limpa os campos relacionados ao reset de senha
+    user.senha = await bcrypt.hash(senha, 10);
+    user.resetpToken = null;
+    user.resetppExpires = null;
+    await user.save();
+
+    return res.status(200).send("Senha redefinida com sucesso");
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send("Ocorreu um erro ao redefinir a senha");
+  }
+};
+
 module.exports = {
   signup,
   login,
   updateUser,
+  forgotPassword,
+  resetPassword,
 };
 
 // module.exports = new UserController();
