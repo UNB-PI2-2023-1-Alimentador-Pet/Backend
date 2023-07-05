@@ -17,7 +17,25 @@ const createPetFeeder = async (req, res) => {
   }
 };
 
-const updatePetFeeder = async (req, res) => {};
+const updatePetFeeder = async (req, res) => {
+  let feeder = {};
+
+  try {
+    await PetFeeder.update(req.body, {
+      where: { token: req.params.token },
+    }).then(async () => {
+      feeder = await PetFeeder.findOne({
+        where: { token: req.params.token },
+      });
+    });
+    
+    return res.status(200).json(feeder);
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json(error);
+  }
+};
 
 const getPetFeeders = async (req, res) => {
   try {
@@ -57,7 +75,7 @@ const bindImageToFeeder = async (req, res) => {
       },
       {
         where: {
-          id: req.params.id,
+          token: req.params.token,
         },
       }
     ).then(async () => {
@@ -72,4 +90,5 @@ module.exports = {
   bindImageToFeeder,
   createPetFeeder,
   getPetFeeders,
+  updatePetFeeder
 };
