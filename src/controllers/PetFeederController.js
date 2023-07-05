@@ -71,7 +71,40 @@ const bindImageToFeeder = async (req, res) => {
 
     PetFeeder.update(
       {
-        fotoPet: fs.readFileSync("./public/upload/pets/" + req.file.filename),
+        fotoPet: fs.readFileSync("./public/upload/pets/images/" + req.file.filename),
+      },
+      {
+        where: {
+          token: req.params.token,
+        },
+      }
+    ).then(async () => {
+      return res.status(200).json(`File has been uploaded.`);
+    });
+  } catch (error) {
+    return res.send(`Error when trying upload images: ${error}`);
+  }
+};
+
+const bindAudioToFeeder = async (req, res) => {
+  try {
+    if (req.file == undefined) {
+      return res.status(200).json(`You must select a file.`);
+    }
+
+    const feeder = await PetFeeder.findOne({
+      where: {
+        token: req.params.token,
+      },
+    });
+
+    if (!feeder) {
+      return res.status(404).json("This feeder does not exists!");
+    }
+
+    PetFeeder.update(
+      {
+        audio: fs.readFileSync("./public/upload/pets/audio/" + req.file.filename),
       },
       {
         where: {
@@ -88,6 +121,7 @@ const bindImageToFeeder = async (req, res) => {
 
 module.exports = {
   bindImageToFeeder,
+  bindAudioToFeeder,
   createPetFeeder,
   getPetFeeders,
   updatePetFeeder
