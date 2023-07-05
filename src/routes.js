@@ -2,7 +2,7 @@ const { Router } = require("express");
 const UserController = require("./controllers/UserController");
 const {
   createSchedule, updateSchedule,
-  deleteSchedule, getSchedules, sendSchedulesMQTT
+  deleteSchedule, getSchedules
 } = require("./controllers/ScheduleController");
 const { bindImageToHistory, createHistory, getHistories } = require("./controllers/HistoryController");
 const { signup, login, updateUser } = UserController;
