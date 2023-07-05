@@ -9,7 +9,8 @@ const { signup, login, updateUser } = UserController;
 const userAuth = require('./middlewares/UserAuth');
 const uploadHistoryImage = require('./middlewares/UploadHistoryImage');
 const uploadFeederImage = require('./middlewares/UploadFeederImage');
-const { createPetFeeder, getPetFeeders, bindImageToFeeder, updatePetFeeder } = require("./controllers/PetFeederController");
+const uploadFeederAudio = require('./middlewares/UploadFeederAudio');
+const { createPetFeeder, getPetFeeders, bindImageToFeeder, updatePetFeeder, bindAudioToFeeder } = require("./controllers/PetFeederController");
 
 const routes = Router();
 
@@ -26,6 +27,7 @@ routes.put('/histories/bind_image/:id', userAuth.protect, uploadHistoryImage.sin
 routes.post('/feeders/new', userAuth.protect, createPetFeeder);
 routes.get('/feeders/:userHash', userAuth.protect, getPetFeeders);
 routes.put('/feeders/bind_image/:token', userAuth.protect, uploadFeederImage.single('file'), bindImageToFeeder);
+routes.put('/feeders/bind_audio/:token', userAuth.protect, uploadFeederAudio.single('file'), bindAudioToFeeder);
 routes.put('/feeders/:token', userAuth.protect, updatePetFeeder);
 
 module.exports = routes;
