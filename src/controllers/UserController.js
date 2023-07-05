@@ -112,8 +112,8 @@ const updateUser = async (req, res) => {
 var transport = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "",
-    pass: "",
+    user: "miaufeeder@gmail.com",
+    pass: "prtqpwagcpgnzwgz",
   },
 });
 
