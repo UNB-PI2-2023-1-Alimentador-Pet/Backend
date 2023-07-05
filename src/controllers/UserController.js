@@ -4,6 +4,7 @@ const jwt = require("jsonwebtoken");
 const uuidv4 = require("uuid").v4;
 const nodemailer = require("nodemailer");
 const crypto = require("crypto");
+const { Op } = require("sequelize");
 
 const User = db.users;
 
@@ -18,6 +19,7 @@ const signup = async (req, res) => {
       senha: await bcrypt.hash(senha, 10),
       userHash: uuidv4(),
     };
+    
     //saving the user
     const user = await User.create(data);
 
@@ -110,8 +112,8 @@ const updateUser = async (req, res) => {
 var transport = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: "email",
-    pass: "senha",
+    user: "hugoaraliveira@gmail.com",
+    pass: "",
   },
 });
 
@@ -126,10 +128,12 @@ const forgotPassword = async (req, res) => {
       return res.status(404).send("Usuário não encontrado");
     }
 
-    const token = crypto.randomBytes(20).toString("hex");
+    const token = crypto.randomBytes(5).toString("hex");
 
-    user.resetPasswordToken = token;
-    user.resetPasswordExpires = Date.now() + 3600000; // 1 hora
+    // const user = await User.create(data);
+
+    user.resetpToken = token;
+    user.resetpExpires = Date.now() + 3600000; // 1 hora
     await user.save();
 
     const mailOptions = {
@@ -151,12 +155,40 @@ const forgotPassword = async (req, res) => {
   }
 };
 
+const resetPassword = async (req, res) => {
+  const { token, senha } = req.body;
+
+  try {
+    const user = await User.findOne({
+      where: {
+        resetpToken: token,
+        resetpExpires: { [Op.gt]: Date.now() }, // Verifica se o token ainda é válido
+      },
+    });
+
+    if (!user) {
+      return res.status(400).send("Token inválido ou expirado");
+    }
+
+    // Define a nova senha e limpa os campos relacionados ao reset de senha
+    user.senha = await bcrypt.hash(senha, 10);
+    user.resetpToken = null;
+    user.resetppExpires = null;
+    await user.save();
+
+    return res.status(200).send("Senha redefinida com sucesso");
+  } catch (error) {
+    console.log(error);
+    return res.status(500).send("Ocorreu um erro ao redefinir a senha");
+  }
+};
 
 module.exports = {
   signup,
   login,
   updateUser,
   forgotPassword,
+  resetPassword,
 };
 
 // module.exports = new UserController();
