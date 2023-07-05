@@ -17,44 +17,51 @@ const createHistory = async (req, res) => {
 const getHistories = async (req, res) => {
     try {
         const history = await History.findAll({ where: { userHash: req.params.userHash }});
-    
+
         if (history.length) {
           return res.status(200).json(history);
         }
-    
+
         return res.status(200).json({message: 'No histories found for this user!'});
       } catch (error) {
         return res.status(500).json({error: error});
       }
 }
 
-const bindImage = async (req, res) => {
+const bindImageToHistory = async (req, res) => {
   try {
-    console.log(req.file);
-
     if (req.file == undefined) {
-      return res.send(`You must select a file.`);
+      return res.status(200).json(`You must select a file.`);
+    }
+
+    const history = await History.findOne({
+      where: {
+        id: req.params.id
+      }
+    });
+
+    if (!history) {
+      return res.status(404).json('This history does not exists!');
     }
 
     History.update({
-      photo: fs.writeFileSync(
-        __basedir + "/images" + req.file
+      foto: fs.readFileSync(
+        "./public/upload/histories/" + req.file.filename
       ),
     }, {
         where: {
             id: req.params.id
         }
     }).then(async () => {
-        return res.send(`File has been uploaded.`);
+        return res.status(200).json(`File has been uploaded.`);
     });
   } catch (error) {
-    console.log(error);
     return res.send(`Error when trying upload images: ${error}`);
   }
 };
 
 module.exports = {
-  bindImage,
+  bindImageToHistory,
   createHistory,
   getHistories
 };
