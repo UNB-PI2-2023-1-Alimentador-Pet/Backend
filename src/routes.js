@@ -1,12 +1,10 @@
 const { Router } = require("express");
-const UserController = require("./controllers/UserController");
 const {
   createSchedule, updateSchedule,
   deleteSchedule, getSchedules
 } = require("./controllers/ScheduleController");
 const { bindImageToHistory, createHistory, getHistories } = require("./controllers/HistoryController");
-const { signup, login, updateUser } = UserController;
-const { signup, login, updateUser, forgotPassword, resetPassword } = UserController;
+const { signup, login, updateUser, forgotPassword, resetPassword } = require("./controllers/UserController");
 const userAuth = require('./middlewares/UserAuth');
 const uploadHistoryImage = require('./middlewares/UploadHistoryImage');
 const uploadFeederImage = require('./middlewares/UploadFeederImage');
