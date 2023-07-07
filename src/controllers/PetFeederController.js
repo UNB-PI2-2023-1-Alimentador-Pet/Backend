@@ -1,13 +1,11 @@
 const fs = require("fs");
 const { db } = require("../db/db.js");
-const uuidv4 = require("uuid").v4;
 
 const PetFeeder = db.petfeeders;
 
 const createPetFeeder = async (req, res) => {
   try {
     const data = req.body;
-    data.token = uuidv4();
 
     await PetFeeder.create(data).then(async (feeder) => {
       return res.status(200).json(feeder);
