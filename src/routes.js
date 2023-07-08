@@ -9,7 +9,10 @@ const userAuth = require('./middlewares/UserAuth');
 const uploadHistoryImage = require('./middlewares/UploadHistoryImage');
 const uploadFeederImage = require('./middlewares/UploadFeederImage');
 const uploadFeederAudio = require('./middlewares/UploadFeederAudio');
-const { createPetFeeder, getPetFeeders, bindImageToFeeder, updatePetFeeder, bindAudioToFeeder } = require("./controllers/PetFeederController");
+const { 
+  createPetFeeder, getPetFeeders, 
+  bindImageToFeeder, updatePetFeeder, 
+  bindAudioToFeeder, getPetFeeder } = require("./controllers/PetFeederController");
 
 const routes = Router();
 
@@ -26,6 +29,7 @@ routes.put('/histories/bind_image/:id', uploadHistoryImage.single('file'), bindI
 routes.put('/histories/:id', userAuth.protect, updateHistory);
 routes.post('/feeders/new', userAuth.protect, createPetFeeder);
 routes.get('/feeders/:userHash', userAuth.protect, getPetFeeders);
+routes.get('/feeder/:token', getPetFeeder);
 routes.put('/feeders/bind_image/:token', userAuth.protect, uploadFeederImage.single('file'), bindImageToFeeder);
 routes.put('/feeders/bind_audio/:token', userAuth.protect, uploadFeederAudio.single('file'), bindAudioToFeeder);
 routes.put('/feeders/:token', userAuth.protect, updatePetFeeder);
