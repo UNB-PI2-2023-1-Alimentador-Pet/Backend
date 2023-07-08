@@ -8,8 +8,8 @@ const createHistory = async (req, res) => {
     try {
       const user = await User.findOne({ where: { userHash: req.body.userHash }});
 
-        if (!user)
-          return res.status(200).json({message: 'This user doesn\'t exists!'});
+      if (!user)
+        return res.status(200).json({message: 'This user doesn\'t exists!'});
 
         await History.create(req.body)
           .then(async (history) => {
