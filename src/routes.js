@@ -3,7 +3,7 @@ const {
   createSchedule, updateSchedule,
   deleteSchedule, getSchedules
 } = require("./controllers/ScheduleController");
-const { bindImageToHistory, createHistory, getHistories } = require("./controllers/HistoryController");
+const { bindImageToHistory, createHistory, getHistories, updateHistory } = require("./controllers/HistoryController");
 const { signup, login, updateUser, forgotPassword, resetPassword } = require("./controllers/UserController");
 const userAuth = require('./middlewares/UserAuth');
 const uploadHistoryImage = require('./middlewares/UploadHistoryImage');
@@ -23,6 +23,7 @@ routes.delete('/schedules/delete/:scheduleId', userAuth.protect, deleteSchedule)
 routes.post('/histories/new', userAuth.protect, createHistory);
 routes.get('/histories/:userHash', userAuth.protect, getHistories);
 routes.put('/histories/bind_image/:id', userAuth.protect, uploadHistoryImage.single('file'), bindImageToHistory);
+routes.put('/histories/:id', userAuth.protect, updateHistory);
 routes.post('/feeders/new', userAuth.protect, createPetFeeder);
 routes.get('/feeders/:userHash', userAuth.protect, getPetFeeders);
 routes.put('/feeders/bind_image/:token', userAuth.protect, uploadFeederImage.single('file'), bindImageToFeeder);

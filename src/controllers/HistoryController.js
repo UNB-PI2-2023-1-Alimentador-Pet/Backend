@@ -2,9 +2,15 @@ const fs = require("fs");
 const { db } = require("../db/db.js");
 
 const History = db.histories;
+const User = db.users;
 
 const createHistory = async (req, res) => {
     try {
+      const user = await User.findOne({ where: { userHash: req.body.userHash }});
+
+        if (!user)
+          return res.status(200).json({message: 'This user doesn\'t exists!'});
+
         await History.create(req.body)
           .then(async (history) => {
             return res.status(200).json(history);
@@ -27,6 +33,26 @@ const getHistories = async (req, res) => {
         return res.status(500).json({error: error});
       }
 }
+
+const updateHistory = async (req, res) => {
+  let history = {};
+
+  try {
+    await History.update(req.body, {
+      where: { id: req.params.id },
+    }).then(async () => {
+      history = await History.findOne({
+        where: { id: req.params.id },
+      });
+    });
+    
+    return res.status(200).json(history);
+  } catch (error) {
+    console.log(error);
+
+    return res.status(500).json(error);
+  }
+};
 
 const bindImageToHistory = async (req, res) => {
   try {
@@ -63,5 +89,6 @@ const bindImageToHistory = async (req, res) => {
 module.exports = {
   bindImageToHistory,
   createHistory,
-  getHistories
+  getHistories,
+  updateHistory
 };
