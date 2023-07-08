@@ -2,9 +2,15 @@ const fs = require("fs");
 const { db } = require("../db/db.js");
 
 const PetFeeder = db.petfeeders;
+const User = db.users;
 
 const createPetFeeder = async (req, res) => {
   try {
+    const user = await User.findOne({ where: { userHash: req.body.userHash }});
+
+    if (!user)
+      return res.status(200).json({message: 'This user doesn\'t exists!'});
+
     const data = req.body;
 
     await PetFeeder.create(data).then(async (feeder) => {
@@ -117,10 +123,29 @@ const bindAudioToFeeder = async (req, res) => {
   }
 };
 
+const getPetFeeder = async (req, res) => {
+  try {
+    const feeder = await PetFeeder.findOne({
+      where: {
+        token: req.params.token,
+      },
+    });
+
+    if (!feeder) {
+      return res.status(404).json("This feeder does not exists!");
+    }
+
+    return res.status(200).json(feeder);
+  } catch (error) {
+    return res.status(500).send(error);
+  }
+}
+
 module.exports = {
   bindImageToFeeder,
   bindAudioToFeeder,
   createPetFeeder,
   getPetFeeders,
+  getPetFeeder,
   updatePetFeeder
 };
