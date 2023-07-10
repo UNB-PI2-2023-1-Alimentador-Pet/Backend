@@ -1,7 +1,7 @@
 const { Router } = require("express");
 const {
   createSchedule, updateSchedule,
-  deleteSchedule, getSchedules
+  deleteSchedule, getSchedules, optimizedSchedule
 } = require("./controllers/ScheduleController");
 const { bindImageToHistory, createHistory, getHistories, updateHistory } = require("./controllers/HistoryController");
 const { signup, login, updateUser, forgotPassword, resetPassword } = require("./controllers/UserController");
@@ -35,5 +35,6 @@ routes.put('/feeders/bind_audio/:token', userAuth.protect, uploadFeederAudio.sin
 routes.put('/feeders/:token', userAuth.protect, updatePetFeeder);
 routes.post("/users/forgot-password", forgotPassword);
 routes.post("/users/reset-password", resetPassword);
+routes.post("/schedules/optimize", optimizedSchedule);
 
 module.exports = routes;
