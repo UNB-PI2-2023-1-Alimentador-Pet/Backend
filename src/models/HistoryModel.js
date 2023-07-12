@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false
         },
         foto: {
-            type: DataTypes.BLOB('long'),
+            type: DataTypes.ARRAY(DataTypes.BLOB('long')),
             allowNull: true
         },
         userHash: {

@@ -56,7 +56,7 @@ const updateHistory = async (req, res) => {
 
 const bindImageToHistory = async (req, res) => {
   try {
-    if (req.file == undefined) {
+    if (!req.files.length) {
       return res.status(200).json(`You must select a file.`);
     }
 
@@ -70,10 +70,17 @@ const bindImageToHistory = async (req, res) => {
       return res.status(404).json('This history does not exists!');
     }
 
+    let history_photos = history.foto ? history.foto : [];
+
+    for (let i = 0; i < req.files.length; i++) {
+      history_photos.push(fs.readFileSync(
+        "./public/upload/histories/" + req.files[i].filename
+      ));
+    }
+
+
     History.update({
-      foto: fs.readFileSync(
-        "./public/upload/histories/" + req.file.filename
-      ),
+      foto: history_photos,
     }, {
         where: {
             id: req.params.id
