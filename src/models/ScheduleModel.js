@@ -27,6 +27,10 @@ module.exports = (sequelize, DataTypes) => {
       type: DataTypes.STRING,
       allowNull: false,
       primaryKey: true
+    },
+    token: {
+      type: DataTypes.STRING,
+      allowNull: false
     }
   }, {timestamps: true});
 

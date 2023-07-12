@@ -1,7 +1,8 @@
 const { Router } = require("express");
 const {
   createSchedule, updateSchedule,
-  deleteSchedule, getSchedules, optimizedSchedule
+  deleteSchedule, getSchedules, optimizedSchedule,
+  getSchedulesByFeeder
 } = require("./controllers/ScheduleController");
 const { bindImageToHistory, createHistory, getHistories, updateHistory } = require("./controllers/HistoryController");
 const { signup, login, updateUser, forgotPassword, resetPassword } = require("./controllers/UserController");
@@ -20,6 +21,7 @@ routes.post('/users/signup', userAuth.saveUser, signup);
 routes.post('/users/login', login);
 routes.put('/users/edit/:userHash', userAuth.protect, updateUser);
 routes.get('/schedules/:userHash', userAuth.protect, getSchedules);
+routes.get('/schedules/find_by_feeder/:token', userAuth.protect, getSchedulesByFeeder);
 routes.post('/schedules/new', userAuth.protect, createSchedule);
 routes.put('/schedules/edit/:scheduleId', userAuth.protect, updateSchedule);
 routes.delete('/schedules/delete/:scheduleId', userAuth.protect, deleteSchedule);
