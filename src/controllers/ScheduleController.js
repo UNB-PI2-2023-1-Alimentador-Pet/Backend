@@ -137,7 +137,7 @@ const sendSchedulesMQTT = async (userHash) => {
   }
 }
 
-const optimizedSchedule = async (req, res) => {
+const optimizedSchedule = async (req, res, jsonFilePath) => {
   try {
     // gera todas as combinações possíveis de horário, quantidade consumida
     // e tempo de bandeja
@@ -201,7 +201,7 @@ const optimizedSchedule = async (req, res) => {
     }
 
     // Pega o caminho do arquivo JSON
-    const animalAgendaPath = req.body.animalAgendaPath;
+    const animalAgendaPath = jsonFilePath;
 
     // Le o conteudo do arquivo JSON
     const animalAgendaData = fs.readFileSync(animalAgendaPath, 'utf8');
