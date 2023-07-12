@@ -35,7 +35,6 @@ routes.put('/feeders/bind_audio/:token', userAuth.protect, uploadFeederAudio.sin
 routes.put('/feeders/:token', userAuth.protect, updatePetFeeder);
 routes.post("/users/forgot-password", forgotPassword);
 routes.post("/users/reset-password", resetPassword);
-//routes.post("/schedules/optimize", optimizedSchedule);
 routes.get('/optimized-schedule/myPet', (req, res) => {
   optimizedSchedule(req, res, '/app/myPet.json');
 });
