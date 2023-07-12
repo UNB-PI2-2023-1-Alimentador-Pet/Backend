@@ -124,6 +124,20 @@ const getSchedules = async (req, res) => {
   }
 }
 
+const getSchedulesByFeeder = async (req, res) => {
+  try {
+    const schedules = await Schedule.findAll({ where: { token: req.params.token }});
+
+    if (schedules.length) {
+      return res.status(200).json(schedules);
+    }
+
+    return res.status(200).json({message: 'No schedules found for this feeder!'});
+  } catch (error) {
+    return res.status(500).json({error: error});
+  }
+}
+
 const sendSchedulesMQTT = async (userHash) => {
   try {
     const schedules = await Schedule.findAll({ where: { userHash: userHash }});
@@ -230,5 +244,6 @@ module.exports = {
   deleteSchedule,
   sendSchedulesMQTT,
   getSchedules,
+  getSchedulesByFeeder,
   optimizedSchedule
 }
