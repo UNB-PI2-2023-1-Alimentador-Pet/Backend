@@ -1,6 +1,8 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const uuidv4 = require("uuid").v4;
+const { db } = require("../../db/db.js");
+const { signup, login } = require("../../controllers/UserController.js");
 
 jest.mock("../../db/db.js", () => ({
   db: {
@@ -13,19 +15,16 @@ jest.mock("bcrypt");
 jest.mock("jsonwebtoken");
 jest.mock("uuid");
 
-const { db } = require("../../db/db.js");
-const { signup } = require("../../controllers/UserController.js");
-
 describe("signup", () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it("should sign up a user and return the user details", async () => {
+  it("deve registrar e retornar os dados do usuario", async () => {
     const req = {
       body: {
-        nome: "John Doe",
-        email: "john@example.com",
+        nome: "Hugo Dev",
+        email: "hugo@example.com",
         senha: "password",
       },
     };
