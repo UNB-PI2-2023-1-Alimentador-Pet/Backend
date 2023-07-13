@@ -27,7 +27,7 @@ routes.put('/schedules/edit/:scheduleId', userAuth.protect, updateSchedule);
 routes.delete('/schedules/delete/:scheduleId', userAuth.protect, deleteSchedule);
 routes.post('/histories/new', createHistory);
 routes.get('/histories/:userHash', getHistories);
-routes.put('/histories/bind_image/:id', uploadHistoryImage.array('file', 5), bindImageToHistory);
+routes.put('/histories/bind_image/:id', uploadHistoryImage.single('file'), bindImageToHistory);
 routes.put('/histories/:id', updateHistory);
 routes.post('/feeders/new', userAuth.protect, createPetFeeder);
 routes.get('/feeders/:userHash', userAuth.protect, getPetFeeders);
