@@ -1,5 +1,5 @@
 const { db } = require("../db/db.js");
-const { publishMessage } = require('../utils/mqtt.js');
+const { publishMessage, client } = require('../utils/mqtt.js');
 const Schedule = db.schedules;
 const User = db.users;
 const _ = require('lodash');
@@ -153,6 +153,40 @@ const sendSchedulesMQTT = async (userHash) => {
   }
 }
 
+const autoFeedInfo = async (req, res) => {
+  try {
+    const {topic, ...feedInfo} = req.body;
+
+    publishMessage(topic, feedInfo).then(onfulfilled => {
+      return res.status(200).json(feedInfo);
+    }).catch(onrejected => {
+      return res.status(500).json(onrejected);
+    })
+
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+}
+
+const receiveESPTopic = async (req, res) => {
+  try {
+    const {topic} = req.body;
+
+    client.subscribe(topic, (err, granted) =>
+    { 
+      let success_message = "Subscribed to " + topic;
+      console.log(success_message);
+      if (err) {console.log(err);}
+
+      return res.status(200).json(success_message);
+    });
+
+
+  } catch (error) {
+    return res.status(500).json(error);
+  }
+}
+
 const optimizedScheduleForAllPets = async (req, res) => {
   try {
 
@@ -273,5 +307,7 @@ module.exports = {
   getSchedules,
   getSchedulesByFeeder,
   optimizedScheduleForAllPets,
-  optimizedScheduleForMyPet
+  optimizedScheduleForMyPet,
+  autoFeedInfo,
+  receiveESPTopic
 }

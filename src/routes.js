@@ -4,7 +4,9 @@ const {
   deleteSchedule, getSchedules, optimizedSchedule,
   getSchedulesByFeeder,
   optimizedScheduleForAllPets,
-  optimizedScheduleForMyPet
+  optimizedScheduleForMyPet,
+  autoFeedInfo,
+  receiveESPTopic
 } = require("./controllers/ScheduleController");
 const { bindImageToHistory, createHistory, getHistories, updateHistory } = require("./controllers/HistoryController");
 const { signup, login, updateUser, forgotPassword, resetPassword } = require("./controllers/UserController");
@@ -41,5 +43,7 @@ routes.post("/users/forgot-password", forgotPassword);
 routes.post("/users/reset-password", resetPassword);
 routes.get('/optimized-schedule/all_pets', optimizedScheduleForAllPets);
 routes.get('/optimized-schedule/my_pet/:userHash', optimizedScheduleForMyPet);
+routes.post('/receive-feed-info', autoFeedInfo);
+routes.post('/receive-ESP-topic', receiveESPTopic);
 
 module.exports = routes;
