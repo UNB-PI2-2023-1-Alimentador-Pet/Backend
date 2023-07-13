@@ -5,6 +5,8 @@ const User = db.users;
 const _ = require('lodash');
 const fs = require('fs');
 
+const History = db.histories;
+
 const createSchedule = async (req, res) => {
   const topic = `schedules/${req.body.userHash}`;
 
@@ -151,77 +153,18 @@ const sendSchedulesMQTT = async (userHash) => {
   }
 }
 
-const optimizedSchedule = async (req, res, jsonFilePath) => {
+const optimizedScheduleForAllPets = async (req, res) => {
   try {
-    // gera todas as combinações possíveis de horário, quantidade consumida
-    // e tempo de bandeja
-    function generateCombinations(data) {
-      const combinations = [];
-  
-      const uniqueHorarios = _.uniqBy(data, 'horario');
-      const uniqueQuantidades = _.uniqBy(data, 'quantidadeConsumida');
-      const uniqueTemposBandeja = _.uniqBy(data, 'tempoBandeja');
-  
-      uniqueHorarios.forEach(horario => {
-        uniqueQuantidades.forEach(quantidade => {
-          uniqueTemposBandeja.forEach(tempoBandeja => {
-            combinations.push({
-              horario: horario.horario,
-              quantidade: quantidade.quantidadeConsumida,
-              tempoBandeja: tempoBandeja.tempoBandeja
-            });
-          });
-        });
-      });
-  
-      return combinations;
-    }
-
-    // calcula o total consumido com base na combinação fornecida
-    function calculateTotalConsumed(data, combination) {
-      return _.sumBy(data, item => {
-        if (
-          item.horario === combination.horario &&
-          item.quantidadeConsumida === combination.quantidade &&
-          item.tempoBandeja === combination.tempoBandeja
-        ) {
-          return item.quantidadeConsumida;
-        }
-        return 0;
-      });
-    }
-
-    // gera a sugestao de agenda otimizada
-    function generateOptimizedSchedule(data) {
-      const combinations = generateCombinations(data);
-      let maxTotalConsumed = 0;
-      let optimizedSchedule = null;
-
-      combinations.forEach(combination => {
-        const totalConsumed = calculateTotalConsumed(data, combination);
-
-        if (totalConsumed > maxTotalConsumed) {
-          maxTotalConsumed = totalConsumed;
-          optimizedSchedule = combination;
-        }
-      });
-
-      return optimizedSchedule;
-    }
-
-    // Verifica o corpo da requisição
-    if (!req.body.animalAgendaPath) {
-      return res.status(400).json({ error: 'Missing animalAgendaPath in request body' });
-    }
 
     // Pega o caminho do arquivo JSON
-    const animalAgendaPath = jsonFilePath;
+    /*const animalAgendaPath = jsonFilePath;
 
     // Le o conteudo do arquivo JSON
     const animalAgendaData = fs.readFileSync(animalAgendaPath, 'utf8');
 
     // Converte os dados do arquivo JSON em objeto
-    const animalAgenda = JSON.parse(animalAgendaData);
+    const animalAgenda = JSON.parse(animalAgendaData);*/
+    const animalAgenda = await History.findAll();
 
     // Gera a sugestao de agenda otimizada
     const optimizedSchedule = generateOptimizedSchedule(animalAgenda);
@@ -230,13 +173,97 @@ const optimizedSchedule = async (req, res, jsonFilePath) => {
     console.log('Sugestão de agenda otimizada:');
     console.log(optimizedSchedule);
 
-    res.status(200).json(optimizedSchedule);
+    return res.status(200).json(optimizedSchedule);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
 };
 
+const optimizedScheduleForMyPet = async (req, res) => {
+  try {
+
+    // Pega o caminho do arquivo JSON
+    /*const animalAgendaPath = jsonFilePath;
+
+    // Le o conteudo do arquivo JSON
+    const animalAgendaData = fs.readFileSync(animalAgendaPath, 'utf8');
+
+    // Converte os dados do arquivo JSON em objeto
+    const animalAgenda = JSON.parse(animalAgendaData);*/
+    const animalAgenda = await History.findAll({
+      where: {userHash: req.params.userHash}
+    });
+
+    // Gera a sugestao de agenda otimizada
+    const optimizedSchedule = generateOptimizedSchedule(animalAgenda);
+
+    // Exibe a sugestao de agenda otimizada
+    console.log('Sugestão de agenda otimizada:');
+    console.log(optimizedSchedule);
+
+    return res.status(200).json(optimizedSchedule);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+};
+
+// gera todas as combinações possíveis de horário, quantidade consumida
+// e tempo de bandeja
+function generateCombinations(data) {
+  const combinations = [];
+
+  const uniqueHorarios = _.uniqBy(data, 'horario');
+  const uniqueQuantidades = _.uniqBy(data, 'quantidadeConsumida');
+  const uniqueQuantTotal = _.uniqBy(data, 'quantidadeTotal');
+
+  uniqueHorarios.forEach(horario => {
+    uniqueQuantidades.forEach(quantidade => {
+      uniqueQuantTotal.forEach(quantidadeTotal => {
+        combinations.push({
+          horario: horario.horario,
+          quantidade: quantidade.quantidadeConsumida,
+          quantidadeTotal: quantidadeTotal.quantidadeTotal
+        });
+      });
+    });
+  });
+
+  return combinations;
+}
+
+// calcula o total consumido com base na combinação fornecida
+function calculateTotalConsumed(data, combination) {
+  return _.sumBy(data, item => {
+    if (
+      item.horario === combination.horario &&
+      item.quantidadeConsumida === combination.quantidade &&
+      item.quantidadeTotal === combination.quantidadeTotal
+    ) {
+      return item.quantidadeConsumida;
+    }
+    return 0;
+  });
+}
+
+// gera a sugestao de agenda otimizada
+function generateOptimizedSchedule(data) {
+  const combinations = generateCombinations(data);
+  let maxTotalConsumed = 0;
+  let optimizedSchedule = null;
+
+  combinations.forEach(combination => {
+    const totalConsumed = calculateTotalConsumed(data, combination);
+
+    if (totalConsumed > maxTotalConsumed) {
+      maxTotalConsumed = totalConsumed;
+      optimizedSchedule = combination;
+    }
+  });
+
+  return optimizedSchedule;
+}
 
 module.exports = {
   createSchedule,
@@ -245,5 +272,6 @@ module.exports = {
   sendSchedulesMQTT,
   getSchedules,
   getSchedulesByFeeder,
-  optimizedSchedule
+  optimizedScheduleForAllPets,
+  optimizedScheduleForMyPet
 }
