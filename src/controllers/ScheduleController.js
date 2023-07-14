@@ -52,14 +52,15 @@ const updateSchedule = async (req, res) => {
 
 
   try {
+
     await Schedule.update(req.body, {
       where: {
         userHash: userHash,
         horario: horario,
         quantidade: quantidade
       },
-    }).then(async () => {
-        await sendSchedulesMQTT(userHash).then(async (resolve) => {
+    }).then(async (updateSchedule) => {
+        await sendSchedulesMQTT(userHash, updateSchedule).then(async (resolve) => {
           schedule = await Schedule.findOne({
             where: {
               userHash:  userHash,
