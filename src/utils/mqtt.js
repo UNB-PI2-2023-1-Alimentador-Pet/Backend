@@ -1,4 +1,6 @@
 const mqtt = require('mqtt');
+const {db} = require('../db/db.js');
+const PetFeeder = db.petfeeders;
 
 const host = 'broker.emqx.io';
 const port = '1883'
@@ -21,6 +23,20 @@ client.on('connect', () => {
 
 client.on('message', (topic, message) => {
   console.log(`Received message on topic '${topic}': ${message}`);
+
+  let message_parsed = JSON.parse(message);
+  if (message_parsed.action == "status") {
+    console.log(message_parsed.action);
+
+    PetFeeder.update({
+      reservatory_level: message_parsed.reservatory_level,
+      open: message_parsed.open
+    }, {
+      where: {
+        token: message_parsed.token
+      }
+    })
+  }
 });
 
 const publishMessage = async (topic, message) => {
@@ -37,4 +53,5 @@ const publishMessage = async (topic, message) => {
 
 module.exports = {
   publishMessage,
+  client
 }

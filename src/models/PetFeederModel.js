@@ -37,6 +37,14 @@ module.exports = (sequelize, DataTypes) => {
     userHash: {
       type: DataTypes.STRING,
       allowNull: false
+    },
+    reservatory_level: {
+      type: DataTypes.INTEGER,
+      allowNull: true
+    },
+    open: {
+      type: DataTypes.BOOLEAN,
+      allowNull: true
     }
   }, {timestamps: true});
 
