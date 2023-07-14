@@ -28,7 +28,7 @@ const createSchedule = async (req, res) => {
       .then(async (createdSchedule) => {
         const schedules = await Schedule.findAll({ where: { userHash: req.body.userHash }});
 
-        await sendSchedulesMQTT(req.body.userHash).then((resolve) => {
+        await sendSchedulesMQTT(req.body.userHash, createdSchedule).then((resolve) => {
           return res.status(200).json(createdSchedule);
         });
       });
@@ -140,12 +140,11 @@ const getSchedulesByFeeder = async (req, res) => {
   }
 }
 
-const sendSchedulesMQTT = async (userHash) => {
+const sendSchedulesMQTT = async (userHash, createdSchedule) => {
   try {
-    const schedules = await Schedule.findAll({ where: { userHash: userHash }});
     const topic = `schedules/${userHash}`;
 
-    await publishMessage(topic, schedules);
+    await publishMessage(topic, createdSchedule);
   } catch (error) {
     console.log(error);
 
