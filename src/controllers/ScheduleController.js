@@ -25,17 +25,16 @@ const createSchedule = async (req, res) => {
 
     if (user && !schedule) {
       await Schedule.create(req.body)
-      .then(async (createdSchedule) => {
-        const schedules = await Schedule.findAll({ where: { userHash: req.body.userHash }});
+        .then(async (createdSchedule) => {
+          await sendSchedulesMQTT(req.body.userHash, createdSchedule).then((resolve) => {
 
-        await sendSchedulesMQTT(req.body.userHash, createdSchedule).then((resolve) => {
-          return res.status(200).json(createdSchedule);
+            return res.status(200).json(createdSchedule);
+          });
         });
-      });
     } else if (schedule) {
-      return res.status(500).json({error: 'There\'s a schedule registered for with same horario and quantidade!'});
+      return res.status(500).json({ error: 'There\'s a schedule registered for with same horario and quantidade!' });
     } else {
-      return res.status(404).json({error: 'Invalid user hash!'});
+      return res.status(404).json({ error: 'Invalid user hash!' });
     }
   } catch (error) {
     return res.status(500).json(error);
@@ -43,16 +42,13 @@ const createSchedule = async (req, res) => {
 }
 
 const updateSchedule = async (req, res) => {
-  let schedule = {};
   let scheduleId = req.params.scheduleId;
 
   const horario = scheduleId.split("_")[0];
   const quantidade = scheduleId.split("_")[1];
   const userHash = scheduleId.split("_")[2];
-
-
+  let schedule = {};
   try {
-
     await Schedule.update(req.body, {
       where: {
         userHash: userHash,
@@ -60,20 +56,24 @@ const updateSchedule = async (req, res) => {
         quantidade: quantidade
       },
     }).then(async (updateSchedule) => {
-        await sendSchedulesMQTT(userHash, updateSchedule).then(async (resolve) => {
-          schedule = await Schedule.findOne({
-            where: {
-              userHash:  userHash,
-              horario: horario,
-              quantidade: quantidade
-            }
-          });
-
-          return res.status(200).json(schedule);
+      schedule = await Schedule.findOne({
+        where: {
+          horario: req.body.horario,
+          quantidade: req.body.quantidade,
+          userHash: req.body.userHash
+        }
+      }).then(async (updatedSchedule) => {
+        console.log(updatedSchedule);
+        await sendSchedulesMQTT(userHash, updatedSchedule).then(async (resolve) => {
+          return res.status(200).json(updatedSchedule);
         });
+      })
     });
 
-  } catch (error) {
+
+  }
+
+  catch (error) {
     console.log(error);
 
     return res.status(500).json(error);
@@ -91,22 +91,31 @@ const deleteSchedule = async (req, res) => {
   try {
     await Schedule.destroy({
       where: {
-        userHash:  userHash,
+        userHash: userHash,
         horario: horario,
         quantidade: quantidade
       }
     }).then(async (resolve) => {
-      await sendSchedulesMQTT(userHash).then(async (resolve) => {
-        schedule = await Schedule.findOne({
-          where: {
-            userHash:  userHash,
-            horario: horario,
-            quantidade: quantidade
-          }
-        });
+      schedule = await Schedule.findAll({
+        limit: 1,
+        where: {
+          //your where conditions, or without them if you need ANY entry
+        },
+        order: [['createdAt', 'DESC']]
+      }).then(async function (entries) {
+        //only difference is that you get users list limited to 1
+        //entries[0]
 
-        return res.status(200).json(schedule);
+        const lastSchedule = entries[0];
+        lastSchedule.ativo = "false"
+
+        await sendSchedulesMQTT(userHash, lastSchedule).then(async (resolve) => {
+
+          return res.status(200).json(lastSchedule);
+        });
       });
+
+
     })
   } catch (error) {
     return res.status(500).json(error);
@@ -115,29 +124,29 @@ const deleteSchedule = async (req, res) => {
 
 const getSchedules = async (req, res) => {
   try {
-    const schedules = await Schedule.findAll({ where: { userHash: req.params.userHash }});
+    const schedules = await Schedule.findAll({ where: { userHash: req.params.userHash } });
 
     if (schedules.length) {
       return res.status(200).json(schedules);
     }
 
-    return res.status(200).json({message: 'No schedules found for this user!'});
+    return res.status(200).json({ message: 'No schedules found for this user!' });
   } catch (error) {
-    return res.status(500).json({error: error});
+    return res.status(500).json({ error: error });
   }
 }
 
 const getSchedulesByFeeder = async (req, res) => {
   try {
-    const schedules = await Schedule.findAll({ where: { token: req.params.token }});
+    const schedules = await Schedule.findAll({ where: { token: req.params.token } });
 
     if (schedules.length) {
       return res.status(200).json(schedules);
     }
 
-    return res.status(200).json({message: 'No schedules found for this feeder!'});
+    return res.status(200).json({ message: 'No schedules found for this feeder!' });
   } catch (error) {
-    return res.status(500).json({error: error});
+    return res.status(500).json({ error: error });
   }
 }
 
@@ -149,13 +158,13 @@ const sendSchedulesMQTT = async (userHash, createdSchedule) => {
   } catch (error) {
     console.log(error);
 
-    throw(error);
+    throw (error);
   }
 }
 
 const autoFeedInfo = async (req, res) => {
   try {
-    const {topic, ...feedInfo} = req.body;
+    const { topic, ...feedInfo } = req.body;
 
     publishMessage(topic, feedInfo).then(onfulfilled => {
       return res.status(200).json(feedInfo);
@@ -170,13 +179,12 @@ const autoFeedInfo = async (req, res) => {
 
 const receiveESPTopic = async (req, res) => {
   try {
-    const {topic} = req.body;
+    const { topic } = req.body;
 
-    client.subscribe(topic, (err, granted) =>
-    { 
+    client.subscribe(topic, (err, granted) => {
       let success_message = "Subscribed to " + topic;
       console.log(success_message);
-      if (err) {console.log(err);}
+      if (err) { console.log(err); }
 
       return res.status(200).json(success_message);
     });
@@ -205,7 +213,6 @@ const optimizedScheduleForAllPets = async (req, res) => {
 
     // Exibe a sugestao de agenda otimizada
     console.log('Sugestão de agenda otimizada:');
-    console.log(optimizedSchedule);
 
     return res.status(200).json(optimizedSchedule);
   } catch (error) {
@@ -226,7 +233,7 @@ const optimizedScheduleForMyPet = async (req, res) => {
     // Converte os dados do arquivo JSON em objeto
     const animalAgenda = JSON.parse(animalAgendaData);*/
     const animalAgenda = await History.findAll({
-      where: {userHash: req.params.userHash}
+      where: { userHash: req.params.userHash }
     });
 
     // Gera a sugestao de agenda otimizada
