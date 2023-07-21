@@ -268,3 +268,167 @@ describe("updateUser", () => {
   });
 });
 
+describe("forgotPassword", () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it("should send reset password email if user exists", async () => {
+    const req = {
+      body: {
+        email: "hugo@email.com",
+      },
+    };
+    const res = {
+      status: jest.fn(() => res),
+      send: jest.fn(),
+    };
+
+    const mockUser = {
+      email: "hugo@email.com",
+      save: jest.fn(),
+    };
+
+    db.users.findOne.mockResolvedValue(mockUser);
+
+    await forgotPassword(req, res);
+
+    expect(db.users.findOne).toHaveBeenCalledWith({
+      where: { email: "hugo@email.com" },
+    });
+    expect(mockUser.resetpToken).toEqual(expect.any(String));
+    expect(mockUser.resetpExpires).toEqual(expect.any(Number));
+    expect(mockUser.save).toHaveBeenCalled();
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.send).toHaveBeenCalledWith("Email de redefinição de senha enviado");
+  });
+
+  it("should return an error if user does not exist", async () => {
+    const req = {
+      body: {
+        email: "hugo@email.com",
+      },
+    };
+    const res = {
+      status: jest.fn(() => res),
+      send: jest.fn(),
+    };
+
+    db.users.findOne.mockResolvedValue(null);
+
+    await forgotPassword(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(404);
+    expect(res.send).toHaveBeenCalledWith("Usuário não encontrado");
+  });
+
+  it("should return an error if an error occurs during forgot password", async () => {
+    const req = {
+      body: {
+        email: "hugo@email.com",
+      },
+    };
+    const res = {
+      status: jest.fn(() => res),
+      send: jest.fn(),
+    };
+
+    db.users.findOne.mockRejectedValue(new Error("Database error"));
+
+    await forgotPassword(req, res);
+
+    expect(res.status).toHaveBeenCalledWith(500);
+    expect(res.send).toHaveBeenCalledWith("Ocorreu um erro ao enviar o email.");
+  });
+});
+
+// describe("resetPassword", () => {
+//   beforeEach(() => {
+//     jest.clearAllMocks();
+//   });
+
+//   it("should reset user password if the token is valid and not expired", async () => {
+//     const req = {
+//       body: {
+//         token: "validToken",
+//         senha: "newPassword",
+//       },
+//     };
+//     const res = {
+//       status: jest.fn(() => res),
+//       send: jest.fn(),
+//     };
+
+//     const mockUser = {
+//       resetpToken: "validToken",
+//       resetpExpires: Date.now() + 3600000, // 1 hour from now
+//       senha: "oldPassword",
+//       save: jest.fn(),
+//     };
+
+//     db.users.findOne.mockResolvedValue(mockUser);
+//     bcrypt.hash.mockResolvedValue("hashedPassword");
+
+//     await resetPassword(req, res);
+
+//     expect(db.users.findOne).toHaveBeenCalledWith({
+//       where: {
+//         resetpToken: "validToken",
+//         resetpExpires: expect.objectContaining({ [db.Op.gt]: expect.any(Number) }),
+//       },
+//     });
+//     expect(bcrypt.hash).toHaveBeenCalledWith("newPassword", 10);
+//     expect(mockUser.senha).toEqual("hashedPassword");
+//     expect(mockUser.resetpToken).toBeNull();
+//     expect(mockUser.resetppExpires).toBeNull();
+//     expect(mockUser.save).toHaveBeenCalled();
+//     expect(res.status).toHaveBeenCalledWith(200);
+//     expect(res.send).toHaveBeenCalledWith("Senha redefinida com sucesso");
+//   });
+
+//   it("should return an error if the token is invalid or expired", async () => {
+//     const req = {
+//       body: {
+//         token: "invalidToken",
+//         senha: "newPassword",
+//       },
+//     };
+//     const res = {
+//       status: jest.fn(() => res),
+//       send: jest.fn(),
+//     };
+
+//     const mockUser = {
+//       resetpToken: "invalidToken",
+//       resetpExpires: Date.now() - 3600000, // 1 hour ago
+//       save: jest.fn(),
+//     };
+
+//     db.users.findOne.mockResolvedValue(mockUser);
+
+//     await resetPassword(req, res);
+
+//     expect(res.status).toHaveBeenCalledWith(400);
+//     expect(res.send).toHaveBeenCalledWith("Token inválido ou expirado");
+//   });
+
+//   it("should return an error if an error occurs during reset password", async () => {
+//     const req = {
+//       body: {
+//         token: "validToken",
+//         senha: "newPassword",
+//       },
+//     };
+//     const res = {
+//       status: jest.fn(() => res),
+//       send: jest.fn(),
+//     };
+
+//     db.users.findOne.mockRejectedValue(new Error("Database error"));
+
+//     await resetPassword(req, res);
+
+//     expect(res.status).toHaveBeenCalledWith(500);
+//     expect(res.send).toHaveBeenCalledWith("Ocorreu um erro ao redefinir a senha");
+//   });
+// });
