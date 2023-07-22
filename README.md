@@ -15,4 +15,9 @@ Nesse projeto, o Heroku foi utilizado para armazenar o banco de dados Postgres e
 
 ## Dependências
 
+O projeto foi desenvolvido na linguagem _Javascript_ e utiliza o [NodeJs](https://nodejs.org/en/about) via **npm** para organizar e interpretar a linguagem para a construção de uma API funcional.
+
+O projeto também utiliza o banco de dados relacional [PostgresSql](https://www.postgresql.org/) para organizar os dados armazenados no sistema.
+
+Para facilitar o desenvolvimento colaborativo visando sanar os problemas de incompatibilidade do ambiente de desenvolvimento, utilizamos o [Docker](https://www.docker.com/) para criar o _Container_ e o [Docker Compose](https://docs.docker.com/compose/) para executar os múltiplos _Containers_ do projeto.
 ## Instalação
