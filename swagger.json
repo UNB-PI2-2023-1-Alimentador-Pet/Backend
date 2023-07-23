@@ -1,0 +1,754 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "MiAuFeeder",
+    "description": "Api alimentador de pet",
+    "version": "3.0.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3333"
+    },
+    {
+      "url": "https://miaufeeder.herokuapp.com"
+    }
+  ],
+  "paths": {
+    "/users/signup": {
+      "post": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Registrar usuario",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Usuario"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsuarioCriado"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Details are not correct"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/users/login": {
+      "post": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Login"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UsuarioCriado"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Autentication Failed"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/users/forgot-password": {
+      "post": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Esqueci minha senha",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ForgotPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Email de redefinição de senha enviado"
+          },
+          "404": {
+            "description": "Usuário não encontrado"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    },
+    "/users/reset-password": {
+      "post": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Redefinir senha",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Senha redefinida com sucesso"
+          },
+          "400": {
+            "description": "Token inválido ou expirado"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    },
+    "/schedules/new": {
+      "get": {
+        "tags": [
+          "Schedule"
+        ],
+        "summary": "Obter agendamento",
+        "responses": {
+          "200": {
+            "description": "Ok",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateScheduleRes"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Nenhum agendamento encontrado para este usuário!"
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "Schedule"
+        ],
+        "summary": "Criar agendamento",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSchedule"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateScheduleRes"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Hash de usuário inválido!"
+          },
+          "500": {
+            "description": "Já existe um agendamento registrado com o mesmo horário e quantidade!"
+          }
+        }
+      }
+    },
+    "/schedules/edit/{horario_quantidade_userHash}": {
+      "put": {
+        "tags": [
+          "Schedule"
+        ],
+        "summary": "Editar agendamento",
+        "parameters": [
+          {
+            "name": "horario_quantidade_userHash",
+            "in": "path",
+            "description": "Combinação de horário, quantidade e hash do usuário",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSchedule"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSchedule"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    },
+    "/schedules/delete/": {
+      "delete": {
+        "tags": [
+          "Schedule"
+        ],
+        "summary": "Excluir agendamento",
+        "responses": {
+          "200": {
+            "description": "Agendamento excluído!",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateSchedule"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    },
+    "/histories/new": {
+      "post": {
+        "tags": [
+          "History"
+        ],
+        "summary": "Create History",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/histories_new_body"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Internal Error"
+          }
+        }
+      }
+    },
+    "/histories/{id}/image": {
+      "post": {
+        "tags": [
+          "History"
+        ],
+        "summary": "Vincular imagem a um histórico",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID do histórico",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/id_image_body"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Este histórico não existe!"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    },
+    "/feeders/new": {
+      "post": {
+        "tags": [
+          "Feeder"
+        ],
+        "summary": "Criar alimentador",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFeederRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    },
+    "/feeders/{userHash}": {
+      "get": {
+        "tags": [
+          "Feeder"
+        ],
+        "summary": "Get all the feeders of a user",
+        "parameters": [
+          {
+            "name": "userHash",
+            "in": "path",
+            "description": "Identificador do usuário",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        },
+        "security": [
+          {
+            "BearerAuth": []
+          }
+        ]
+      }
+    },
+    "/feeders/{token}": {
+      "put": {
+        "tags": [
+          "Feeder"
+        ],
+        "summary": "Atualizar dados de um alimentador",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "description": "Token do alimentador",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSchedule"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "ok"
+          }
+        }
+      }
+    },
+    "/feeders/{token}/image": {
+      "post": {
+        "tags": [
+          "Feeder"
+        ],
+        "summary": "Vincular imagem a um alimentador",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "description": "Token do alimentador",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/token_image_body"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Este alimentador não existe!"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    },
+    "/feeders/{token}/audio": {
+      "post": {
+        "tags": [
+          "Feeder"
+        ],
+        "summary": "Vincular áudio a um alimentador",
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "description": "Token do alimentador",
+            "required": true,
+            "style": "simple",
+            "explode": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/token_audio_body"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Este alimentador não existe!"
+          },
+          "500": {
+            "description": "Erro interno do servidor"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Usuario": {
+        "type": "object",
+        "properties": {
+          "nome": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          },
+          "senha": {
+            "type": "string"
+          }
+        }
+      },
+      "UsuarioCriado": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "nome": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "senha": {
+            "type": "string"
+          },
+          "userHash": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "passwordresettoken": {
+            "type": "string"
+          },
+          "passwordresetexpires": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "Login": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        }
+      },
+      "CreateSchedule": {
+        "type": "object",
+        "properties": {
+          "ativo": {
+            "type": "boolean"
+          },
+          "quantidade": {
+            "type": "number",
+            "format": "float"
+          },
+          "recorrencia": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "horario": {
+            "type": "string",
+            "format": "time"
+          },
+          "tempoBandeja": {
+            "type": "integer"
+          },
+          "userHash": {
+            "type": "string"
+          }
+        }
+      },
+      "CreateScheduleRes": {
+        "type": "object",
+        "properties": {
+          "ativo": {
+            "type": "boolean"
+          },
+          "quantidade": {
+            "type": "number",
+            "format": "float"
+          },
+          "recorrencia": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          "horario": {
+            "type": "string",
+            "format": "time"
+          },
+          "tempoBandeja": {
+            "type": "integer"
+          },
+          "userHash": {
+            "type": "string"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreateHistoryRequest": {
+        "type": "object",
+        "properties": {
+          "historico": {
+            "type": "object"
+          }
+        }
+      },
+      "CreateFeederRequest": {
+        "required": [
+          "audioHabilitado",
+          "token",
+          "userHash"
+        ],
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "nomeAlimentador": {
+            "type": "string"
+          },
+          "nomePet": {
+            "type": "string"
+          },
+          "especie": {
+            "type": "string"
+          },
+          "raca": {
+            "type": "string"
+          },
+          "userHash": {
+            "type": "string"
+          },
+          "fotoPet": {
+            "type": "string",
+            "format": "binary"
+          },
+          "audio": {
+            "type": "string",
+            "format": "binary"
+          },
+          "audioHabilitado": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ForgotPasswordRequest": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        }
+      },
+      "ResetPasswordRequest": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          },
+          "senha": {
+            "type": "string"
+          }
+        }
+      },
+      "histories_new_body": {
+        "type": "object",
+        "properties": {
+          "historico": {
+            "type": "object"
+          }
+        }
+      },
+      "id_image_body": {
+        "type": "object",
+        "properties": {
+          "image": {
+            "type": "string",
+            "format": "binary"
+          }
+        }
+      },
+      "token_image_body": {
+        "type": "object",
+        "properties": {
+          "image": {
+            "type": "string",
+            "format": "binary"
+          }
+        }
+      },
+      "token_audio_body": {
+        "type": "object",
+        "properties": {
+          "audio": {
+            "type": "string",
+            "format": "binary"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "BearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  }
+}
