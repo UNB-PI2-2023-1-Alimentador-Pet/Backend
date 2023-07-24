@@ -18,6 +18,14 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         unique: true,
         allowNull: false
+      },
+      resetpToken: {
+        type: DataTypes.STRING,
+        allowNull: true
+      },
+      resetpExpires: {
+        type: DataTypes.DATE, 
+        allowNull: true
       }
   }, {timestamps: true})
 
